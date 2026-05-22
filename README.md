@@ -76,8 +76,8 @@ exact command before the call — if it does not run, we cannot score it.
 
 | When | What |
 |---|---|
-| Fri 22 May | You receive this repo |
+| Day 0 | You receive this repo |
 | ~3 days | Design and build |
-| Wed 27 May | Final commit + 1-hour presentation |
+| Presentation day | Final commit + 1-hour presentation |
 
 Questions before then? Reply to your assignment email.
