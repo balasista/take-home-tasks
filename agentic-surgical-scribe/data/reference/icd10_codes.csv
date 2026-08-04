@@ -1,0 +1,18 @@
+code,descriptor
+K80.00,Calculus of gallbladder with acute cholecystitis without obstruction
+K80.01,Calculus of gallbladder with acute cholecystitis with obstruction
+K80.10,Calculus of gallbladder with chronic cholecystitis without obstruction
+K80.12,Calculus of gallbladder with acute and chronic cholecystitis without obstruction
+K80.20,Calculus of gallbladder without cholecystitis without obstruction
+K80.21,Calculus of gallbladder without cholecystitis with obstruction
+K80.50,Calculus of bile duct without cholangitis or cholecystitis without obstruction
+K81.0,Acute cholecystitis
+K81.1,Chronic cholecystitis
+K81.2,Acute cholecystitis with chronic cholecystitis
+K82.0,Obstruction of gallbladder
+K82.8,Other specified diseases of gallbladder
+K82.A1,Gangrene of gallbladder in cholecystitis
+K82.A2,Perforation of gallbladder in cholecystitis
+K83.09,Other cholangitis
+K91.5,Postcholecystectomy syndrome
+R10.11,Right upper quadrant pain

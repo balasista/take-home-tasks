@@ -1,0 +1,83 @@
+{
+  "case_id": "CASE_0005",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy",
+      "evidence": [
+        "u0008"
+      ]
+    },
+    "converted_to_open": {
+      "value": false,
+      "evidence": [
+        "u0409"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": false,
+      "evidence": [
+        "u0207"
+      ]
+    },
+    "critical_view_of_safety": {
+      "value": "achieved_and_stated",
+      "evidence": [
+        "u0205"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 75,
+      "evidence": [
+        "u0410"
+      ]
+    },
+    "drain_placed": {
+      "value": true,
+      "evidence": [
+        "u0385"
+      ]
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0339"
+      ]
+    },
+    "complications": {
+      "value": [
+        "gallbladder perforation with bile spillage"
+      ],
+      "evidence": [
+        "u0188"
+      ]
+    },
+    "counts_correct": {
+      "value": true,
+      "evidence": [
+        "u0411"
+      ]
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47562",
+        "rationale": "Laparoscopic cholecystectomy. No cholangiogram was performed, so 47563 does not apply.",
+        "evidence": [
+          "u0008",
+          "u0207",
+          "u0409"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K80.12",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as acute on chronic cholecystitis with stones.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codvo.ai/schemas/op_record.schema.json",
+  "title": "Operative Record",
+  "description": "The output contract for one case. Your system writes one file per case at out/<case_id>.json validating against this schema. Extra properties are allowed anywhere; required properties are not optional. A null value means the transcript does not support a value, and is a legitimate, scored answer.",
+  "type": "object",
+  "required": ["case_id", "fields", "coding", "review_queue", "note_markdown", "run"],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "Must match the case_id in the source transcript.",
+      "pattern": "^CASE_[A-Z0-9]+$"
+    },
+
+    "fields": {
+      "type": "object",
+      "description": "The structured operative record. Every field is present. A field the transcript never supports has value null, an empty evidence list, and whatever confidence your system assigns to that judgement.",
+      "required": [
+        "procedure_performed",
+        "converted_to_open",
+        "cholangiogram_performed",
+        "critical_view_of_safety",
+        "estimated_blood_loss_ml",
+        "drain_placed",
+        "specimen_disposition",
+        "complications",
+        "counts_correct"
+      ],
+      "properties": {
+        "procedure_performed": {
+          "$ref": "#/$defs/field",
+          "description": "The procedure as completed, not as booked. A case that started laparoscopically and finished open is an open cholecystectomy.",
+          "properties": { "value": { "type": ["string", "null"] } }
+        },
+        "converted_to_open": {
+          "$ref": "#/$defs/field",
+          "description": "True if the laparoscopic approach was abandoned for an open one. Contemplating conversion is not converting.",
+          "properties": { "value": { "type": ["boolean", "null"] } }
+        },
+        "cholangiogram_performed": {
+          "$ref": "#/$defs/field",
+          "description": "True only if an intraoperative cholangiogram was actually performed. Discussing one, declining one, or describing when one would be indicated are all not performing one.",
+          "properties": { "value": { "type": ["boolean", "null"] } }
+        },
+        "critical_view_of_safety": {
+          "$ref": "#/$defs/field",
+          "description": "achieved_and_stated when the surgeon explicitly states the critical view was obtained. not_achieved when they explicitly state it could not be. null when the transcript never addresses it, which is the case the quality committee cares about most.",
+          "properties": {
+            "value": { "enum": ["achieved_and_stated", "not_achieved", null] }
+          }
+        },
+        "estimated_blood_loss_ml": {
+          "$ref": "#/$defs/field",
+          "description": "Millilitres, as an integer. If the figure is revised during the case, the operative record takes the surgeon's final statement.",
+          "properties": {
+            "value": { "type": ["integer", "null"], "minimum": 0, "maximum": 5000 }
+          }
+        },
+        "drain_placed": {
+          "$ref": "#/$defs/field",
+          "description": "True if a drain was left in situ, false if placement was explicitly declined, null if never addressed.",
+          "properties": { "value": { "type": ["boolean", "null"] } }
+        },
+        "specimen_disposition": {
+          "$ref": "#/$defs/field",
+          "description": "Where the specimen was sent, in the transcript's own terms.",
+          "properties": { "value": { "type": ["string", "null"] } }
+        },
+        "complications": {
+          "$ref": "#/$defs/field",
+          "description": "An empty array and null mean different things and are scored differently. [] means complications were addressed and there were none. null means the transcript never addressed them at all.",
+          "properties": {
+            "value": {
+              "type": ["array", "null"],
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "counts_correct": {
+          "$ref": "#/$defs/field",
+          "description": "The final surgical count. A count that was initially incorrect and then reconciled is a correct count.",
+          "properties": { "value": { "type": ["boolean", "null"] } }
+        }
+      }
+    },
+
+    "coding": {
+      "type": "object",
+      "required": ["cpt", "icd10"],
+      "properties": {
+        "cpt": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/code" },
+          "description": "Codes must exist in data/reference/cpt_codes.csv. A code your model recalled but the table does not contain is invalid, not merely unlucky."
+        },
+        "icd10": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/code" },
+          "description": "Codes must exist in data/reference/icd10_codes.csv."
+        }
+      }
+    },
+
+    "review_queue": {
+      "type": "array",
+      "description": "What the surgeon should look at, most important first. A system that returns an empty queue on every case is asserting certainty it does not have.",
+      "items": {
+        "type": "object",
+        "required": ["rank", "field", "reason"],
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 },
+          "field": {
+            "type": "string",
+            "description": "The field in question, or a dotted path such as coding.cpt."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why a human needs to look. Be specific: 'two conflicting statements' beats 'low confidence'."
+          },
+          "evidence": { "$ref": "#/$defs/evidence" }
+        }
+      }
+    },
+
+    "note_markdown": {
+      "type": "string",
+      "description": "The draft narrative operative note, in the institution's template. It must be derivable from `fields`: anything asserted here and not present there is an unsupported claim.",
+      "minLength": 1
+    },
+
+    "run": {
+      "type": "object",
+      "description": "What this note cost to produce. Not optional.",
+      "required": ["models", "prompt_version", "input_tokens", "output_tokens",
+                   "usd", "wall_clock_s", "llm_calls"],
+      "properties": {
+        "models": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Every model used, including any used only for verification."
+        },
+        "prompt_version": { "type": "string" },
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 },
+        "usd": { "type": "number", "minimum": 0 },
+        "wall_clock_s": { "type": "number", "minimum": 0 },
+        "llm_calls": { "type": "integer", "minimum": 0 },
+        "mock": {
+          "type": "boolean",
+          "description": "True when produced by --mock. Set it honestly; we check it at the live test."
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "evidence": {
+      "type": "array",
+      "description": "utt_id values from THIS case's transcript. Every id must resolve, and the utterances must actually support the value. Citing the whole transcript is not evidence.",
+      "items": { "type": "string", "pattern": "^u[0-9]{4}$" }
+    },
+    "field": {
+      "type": "object",
+      "required": ["value", "evidence", "confidence"],
+      "properties": {
+        "evidence": { "$ref": "#/$defs/evidence" },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Your system's calibrated belief that this value is correct. It should be lower on the fields it gets wrong; we check that relationship, not the absolute number."
+        }
+      }
+    },
+    "code": {
+      "type": "object",
+      "required": ["code", "rationale", "evidence"],
+      "properties": {
+        "code": { "type": "string" },
+        "rationale": {
+          "type": "string",
+          "description": "Why this code and not the neighbouring one. A payer reads this."
+        },
+        "evidence": { "$ref": "#/$defs/evidence" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "case_id": "CASE_0004",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy",
+      "evidence": [
+        "u0008"
+      ]
+    },
+    "converted_to_open": {
+      "value": false,
+      "evidence": [
+        "u0290"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": true,
+      "evidence": [
+        "u0132",
+        "u0139"
+      ]
+    },
+    "critical_view_of_safety": {
+      "value": "achieved_and_stated",
+      "evidence": [
+        "u0131"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 15,
+      "evidence": [
+        "u0291"
+      ]
+    },
+    "drain_placed": {
+      "value": null,
+      "evidence": []
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0241"
+      ]
+    },
+    "complications": {
+      "value": [],
+      "evidence": [
+        "u0292"
+      ]
+    },
+    "counts_correct": {
+      "value": true,
+      "evidence": [
+        "u0293"
+      ]
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47563",
+        "rationale": "Laparoscopic cholecystectomy with cholangiography.",
+        "evidence": [
+          "u0008",
+          "u0132",
+          "u0139",
+          "u0290"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K80.20",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as symptomatic gallstones.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}

@@ -37,8 +37,10 @@ defended to a payer.
 
 - **20 transcripts.** Ambient operating-room audio, already through speech-to-text. One
   JSON object per utterance: `utt_id`, timestamps, `speaker`, a `speaker_role_hint`, an
-  ASR confidence, and the text. Roughly 6k to 10k tokens per case, so a whole transcript
-  fits in one context window. That is deliberate.
+  ASR confidence, and the text. 312 to 541 utterances per case, 44 to 76 minutes.
+  Flattened to id, role and text that is roughly 5k to 7k tokens; the raw JSONL is
+  17k to 26k. Either way a whole case fits in one context window, which is
+  deliberate.
 - **12 gold records** written by a clinical reviewer, plus the signed note for each. This
   is your labeled set and your style corpus. The other 8 cases have no gold.
 - **The case mix is not uniform** and we are not saying what is in it. Most are routine.

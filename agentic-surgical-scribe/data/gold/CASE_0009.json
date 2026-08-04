@@ -1,0 +1,81 @@
+{
+  "case_id": "CASE_0009",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy",
+      "evidence": [
+        "u0008"
+      ]
+    },
+    "converted_to_open": {
+      "value": false,
+      "evidence": [
+        "u0428"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": true,
+      "evidence": [
+        "u0210",
+        "u0217"
+      ]
+    },
+    "critical_view_of_safety": {
+      "value": "achieved_and_stated",
+      "evidence": [
+        "u0209"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 60,
+      "evidence": [
+        "u0429"
+      ]
+    },
+    "drain_placed": {
+      "value": null,
+      "evidence": []
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0356"
+      ]
+    },
+    "complications": {
+      "value": [],
+      "evidence": [
+        "u0430"
+      ]
+    },
+    "counts_correct": {
+      "value": true,
+      "evidence": [
+        "u0438"
+      ]
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47563",
+        "rationale": "Laparoscopic cholecystectomy with cholangiography.",
+        "evidence": [
+          "u0008",
+          "u0210",
+          "u0217",
+          "u0428"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K80.00",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as acute cholecystitis with gallstones.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}

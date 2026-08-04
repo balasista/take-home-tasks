@@ -1,0 +1,84 @@
+{
+  "case_id": "CASE_0012",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy converted to open cholecystectomy",
+      "evidence": [
+        "u0008",
+        "u0214"
+      ]
+    },
+    "converted_to_open": {
+      "value": true,
+      "evidence": [
+        "u0214"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": false,
+      "evidence": [
+        "u0257"
+      ]
+    },
+    "critical_view_of_safety": {
+      "value": "not_achieved",
+      "evidence": [
+        "u0213"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 350,
+      "evidence": [
+        "u0454"
+      ]
+    },
+    "drain_placed": {
+      "value": true,
+      "evidence": [
+        "u0431"
+      ]
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0390"
+      ]
+    },
+    "complications": {
+      "value": [
+        "gallbladder perforation with bile spillage"
+      ],
+      "evidence": [
+        "u0194"
+      ]
+    },
+    "counts_correct": {
+      "value": true,
+      "evidence": [
+        "u0455"
+      ]
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47600",
+        "rationale": "Converted to open; the completed procedure is the open cholecystectomy, not the laparoscopic approach.",
+        "evidence": [
+          "u0008",
+          "u0214",
+          "u0257"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K80.12",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as acute on chronic cholecystitis with stones.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}

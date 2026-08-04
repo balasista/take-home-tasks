@@ -1,0 +1,81 @@
+{
+  "case_id": "CASE_0002",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy",
+      "evidence": [
+        "u0008"
+      ]
+    },
+    "converted_to_open": {
+      "value": false,
+      "evidence": [
+        "u0313"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": false,
+      "evidence": [
+        "u0154"
+      ]
+    },
+    "critical_view_of_safety": {
+      "value": "achieved_and_stated",
+      "evidence": [
+        "u0152"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 35,
+      "evidence": [
+        "u0314"
+      ]
+    },
+    "drain_placed": {
+      "value": false,
+      "evidence": [
+        "u0287"
+      ]
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0258"
+      ]
+    },
+    "complications": {
+      "value": [],
+      "evidence": [
+        "u0315"
+      ]
+    },
+    "counts_correct": {
+      "value": true,
+      "evidence": [
+        "u0316"
+      ]
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47562",
+        "rationale": "Laparoscopic cholecystectomy. No cholangiogram was performed, so 47563 does not apply.",
+        "evidence": [
+          "u0008",
+          "u0154",
+          "u0313"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K80.10",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as chronic cholecystitis with gallstones.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}

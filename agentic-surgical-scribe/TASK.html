@@ -277,7 +277,9 @@ hr.div { border: 0; border-top: 1px solid var(--rule); margin: 46px 0 0; }
       <tr>
         <td><code>data/transcripts/*.jsonl</code></td>
         <td><strong>20 cases.</strong> One utterance per line, in time order. Roughly
-        300 to 700 utterances per case, which is 6k to 10k tokens of transcript.</td>
+        312 to 541 utterances per case, spanning 44 to 76 minutes. Flattened to
+        id, role and text that is roughly 5k to 7k tokens; the raw JSONL is 17k
+        to 26k. Either way, a whole case fits in one context window.</td>
       </tr>
       <tr>
         <td><code>data/gold/*.json</code></td>

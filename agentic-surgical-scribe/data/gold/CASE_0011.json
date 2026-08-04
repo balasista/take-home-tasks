@@ -1,0 +1,74 @@
+{
+  "case_id": "CASE_0011",
+  "fields": {
+    "procedure_performed": {
+      "value": "Laparoscopic cholecystectomy",
+      "evidence": [
+        "u0008"
+      ]
+    },
+    "converted_to_open": {
+      "value": false,
+      "evidence": [
+        "u0302"
+      ]
+    },
+    "cholangiogram_performed": {
+      "value": null,
+      "evidence": []
+    },
+    "critical_view_of_safety": {
+      "value": "achieved_and_stated",
+      "evidence": [
+        "u0138"
+      ]
+    },
+    "estimated_blood_loss_ml": {
+      "value": 30,
+      "evidence": [
+        "u0303"
+      ]
+    },
+    "drain_placed": {
+      "value": null,
+      "evidence": []
+    },
+    "specimen_disposition": {
+      "value": "sent to pathology",
+      "evidence": [
+        "u0245"
+      ]
+    },
+    "complications": {
+      "value": [],
+      "evidence": [
+        "u0304"
+      ]
+    },
+    "counts_correct": {
+      "value": null,
+      "evidence": []
+    }
+  },
+  "coding": {
+    "cpt": [
+      {
+        "code": "47562",
+        "rationale": "Laparoscopic cholecystectomy. No cholangiogram was performed, so 47563 does not apply.",
+        "evidence": [
+          "u0008",
+          "u0302"
+        ]
+      }
+    ],
+    "icd10": [
+      {
+        "code": "K81.0",
+        "rationale": "Preoperative and postoperative diagnosis stated at time out as acute acalculous cholecystitis.",
+        "evidence": [
+          "u0008"
+        ]
+      }
+    ]
+  }
+}
