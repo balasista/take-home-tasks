@@ -1,0 +1,811 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CODVO.AI · Take-Home · Agentic Surgical Scribe</title>
+<style>
+/* Codvo house style for standalone HTML documents. */
+:root {
+  --ground: #edeff2;
+  --panel:  #f7f8fa;
+  --ink:    #111128;
+  --muted:  #5c6675;
+  --rule:   #ccd2da;
+  --accent: #5b2eff;
+  --ok:      #0e7a57;
+  --warn:    #a9670a;
+  --stop:    #ae3227;
+  --ok-bg:   #dceee6;
+  --warn-bg: #f6e9d2;
+  --stop-bg: #f5dedb;
+  --display: "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  --body:    Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --data:    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #12151c; --panel: #191e27; --ink: #e8ebef; --muted: #98a3b2;
+    --rule: #2c333f; --accent: #9d84ff;
+    --ok: #4cc79b; --warn: #e0a952; --stop: #ef8378;
+    --ok-bg: #16332a; --warn-bg: #342814; --stop-bg: #3a1f1c;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #12151c; --panel: #191e27; --ink: #e8ebef; --muted: #98a3b2;
+  --rule: #2c333f; --accent: #9d84ff;
+  --ok: #4cc79b; --warn: #e0a952; --stop: #ef8378;
+  --ok-bg: #16332a; --warn-bg: #342814; --stop-bg: #3a1f1c;
+}
+:root[data-theme="light"] {
+  --ground: #edeff2; --panel: #f7f8fa; --ink: #111128; --muted: #5c6675;
+  --rule: #ccd2da; --accent: #5b2eff;
+  --ok: #0e7a57; --warn: #a9670a; --stop: #ae3227;
+  --ok-bg: #dceee6; --warn-bg: #f6e9d2; --stop-bg: #f5dedb;
+}
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.62;
+  -webkit-font-smoothing: antialiased; margin: 0;
+}
+.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 56px;
+         max-width: 1180px; margin: 0 auto; padding: 0 28px 120px; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; gap: 0; }
+  nav.toc { position: static !important; }
+}
+header.mast { grid-column: 1 / -1; border-bottom: 2px solid var(--ink);
+              padding: 64px 0 22px; margin-bottom: 46px; }
+.eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: .14em;
+           font-size: 12px; font-weight: 600; color: var(--muted); }
+h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 66px); line-height: 1.02;
+     font-weight: 700; letter-spacing: -.005em; margin: 12px 0 14px;
+     text-wrap: balance; max-width: 20ch; }
+.standfirst { max-width: 62ch; color: var(--muted); font-size: 19px; }
+.stamp { font-family: var(--data); font-size: 12px; color: var(--muted); margin-top: 22px;
+         display: flex; flex-wrap: wrap; gap: 6px 22px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-family: var(--display);
+          font-size: 14px; line-height: 1.45; }
+nav.toc ol { list-style: none; display: flex; flex-direction: column; gap: 9px;
+             border-left: 1px solid var(--rule); padding-left: 15px; margin: 0; }
+nav.toc a { color: var(--muted); text-decoration: none; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); }
+nav.toc .grp { text-transform: uppercase; letter-spacing: .1em; font-size: 11px;
+               color: var(--ink); margin-top: 14px; font-weight: 600; }
+main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+section { padding-top: 40px; }
+h2 { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: -.01em;
+     margin: 0 0 6px; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 20px; font-weight: 600; margin: 30px 0 6px; }
+h2 + .lede { color: var(--muted); max-width: 64ch; margin-bottom: 18px; }
+p { max-width: 66ch; margin: 12px 0; }
+strong { font-weight: 600; }
+code, .n { font-family: var(--data); font-size: .88em; }
+a { color: var(--accent); }
+ul.plain { list-style: none; display: flex; flex-direction: column; gap: 8px;
+           max-width: 66ch; margin: 14px 0; padding: 0; }
+ul.plain li { padding-left: 17px; position: relative; }
+ul.plain li::before { content: ""; position: absolute; left: 0; top: .68em;
+                      width: 7px; height: 1px; background: var(--muted); }
+.register { border-top: 2px solid var(--ink); margin: 26px 0 8px; }
+.reg-row { display: grid; grid-template-columns: 38px minmax(0,1fr) 108px; gap: 18px;
+           padding: 15px 0; border-bottom: 1px solid var(--rule); align-items: start; }
+.reg-num { font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1;
+           color: var(--muted); font-variant-numeric: tabular-nums; }
+.reg-name { font-family: var(--display); font-size: 18px; font-weight: 600; }
+.reg-note { color: var(--muted); font-size: 15px; max-width: 60ch; margin-top: 2px; }
+.reg-row.ok .reg-num { color: var(--ok); }
+.reg-row.warn .reg-num { color: var(--warn); }
+.reg-row.stop .reg-num { color: var(--stop); }
+.chip { font-family: var(--display); text-transform: uppercase; letter-spacing: .09em;
+        font-size: 11px; font-weight: 600; padding: 3px 9px; white-space: nowrap;
+        display: inline-block; }
+.chip.ok   { color: var(--ok);   background: var(--ok-bg); }
+.chip.warn { color: var(--warn); background: var(--warn-bg); }
+.chip.stop { color: var(--stop); background: var(--stop-bg); }
+.readout { background: var(--panel); border: 1px solid var(--rule); padding: 16px 18px;
+           margin: 18px 0; font-family: var(--data); font-size: 13.5px; line-height: 1.7;
+           overflow-x: auto; }
+.readout .k { color: var(--muted); }
+.readout .have { color: var(--ok); }
+.readout .miss { color: var(--stop); }
+.readout b { font-weight: 600; font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 15px; }
+.scroll { overflow-x: auto; }
+th { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em;
+     font-size: 11.5px; color: var(--muted); text-align: left; font-weight: 600;
+     border-bottom: 1.5px solid var(--ink); padding: 7px 12px 7px 0; }
+td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel) 60%, transparent); }
+td.num, th.num { text-align: right; font-family: var(--data);
+                 font-variant-numeric: tabular-nums; padding-right: 0; }
+pre { background: var(--panel); border: 1px solid var(--rule); padding: 14px 16px;
+      overflow-x: auto; font-family: var(--data); font-size: 13px; line-height: 1.6; margin: 16px 0; }
+.callout { border-left: 3px solid var(--accent); padding: 2px 0 2px 20px; margin: 22px 0;
+           max-width: 64ch; }
+.callout .label { font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+                  font-size: 11px; font-weight: 600; color: var(--accent); }
+.callout.warn { border-left-color: var(--warn); }
+.callout.warn .label { color: var(--warn); }
+.callout.stop { border-left-color: var(--stop); }
+.callout.stop .label { color: var(--stop); }
+hr.div { border: 0; border-top: 1px solid var(--rule); margin: 46px 0 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { a { transition: color .12s ease; } }
+
+/* document-specific, tokens only */
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 34px; }
+@media (max-width: 620px) { .opts { grid-template-columns: 1fr; } }
+.opt { border-top: 2px solid var(--rule); padding: 14px 0 18px; }
+.opt .tag { font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+            font-size: 11px; font-weight: 600; color: var(--accent); }
+.opt h3 { margin: 4px 0 4px; }
+.opt p { font-size: 15px; color: var(--muted); margin: 0; max-width: none; }
+</style>
+
+<div class="shell">
+
+<header class="mast">
+  <div class="eyebrow">CODVO.AI · Take-Home Assignment</div>
+  <h1>Agentic Surgical Scribe</h1>
+  <p class="standfirst">Turn raw operating-room speech into a structured, evidence-linked
+  operative record, a draft note the surgeon will actually sign, and a coding proposal
+  that can be defended to a payer.</p>
+  <div class="stamp">
+    <span>ROLE Agentic AI Architect</span>
+    <span>EFFORT ~3 days</span>
+    <span>PRESENTATION 60 min (40 + 20)</span>
+    <span>BRIEF v1.0</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ol>
+    <li class="grp">The problem</li>
+    <li><a href="#scenario">1 · Scenario</a></li>
+    <li><a href="#objective">2 · Objective</a></li>
+    <li><a href="#data">3 · The data package</a></li>
+    <li><a href="#hard">4 · Why this is hard</a></li>
+    <li class="grp">The build</li>
+    <li><a href="#contract">5 · Output contract</a></li>
+    <li><a href="#architecture">6 · Choose your architecture</a></li>
+    <li><a href="#mandatory">7 · Mandatory capabilities</a></li>
+    <li><a href="#eval">8 · Build your own eval</a></li>
+    <li><a href="#stretch">9 · Stretch (pick one)</a></li>
+    <li class="grp">The assessment</li>
+    <li><a href="#live">10 · The live test</a></li>
+    <li><a href="#present">11 · The presentation</a></li>
+    <li><a href="#evaluate">12 · How we score you</a></li>
+    <li><a href="#rules">13 · Ground rules</a></li>
+    <li><a href="#submit">14 · Timeline</a></li>
+    <li><a href="#faq">15 · FAQ</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="scenario">
+  <h2>1 · Scenario</h2>
+  <p class="lede">A hospital surgical services group runs a high-volume laparoscopic
+  cholecystectomy service. The operative notes are the problem, not the surgery.</p>
+
+  <p>Surgeons dictate the operative note after the case, often hours later and sometimes
+  the next morning. By then the detail has faded. Three things go wrong, repeatedly:</p>
+
+  <ul class="plain">
+    <li><strong>The note is late.</strong> Billing cannot code the case until the note is
+    signed, so revenue sits in a queue.</li>
+    <li><strong>The note is thin.</strong> Required documentation elements go missing.
+    The one the quality committee cares about most is the <strong>Critical View of
+    Safety</strong>: if the surgeon achieved it and did not say so in the note, the case
+    reads as unsafe in the audit even though it was not.</li>
+    <li><strong>The coding is wrong or defensive.</strong> A cholangiogram that was
+    discussed but never performed gets coded as performed. A case converted to open gets
+    coded as laparoscopic. Both are the kind of error that turns into a payer clawback.</li>
+  </ul>
+
+  <p>The group already records ambient audio in the operating room and runs it through a
+  commodity speech-to-text service. They now have transcripts and no idea what to do with
+  them. They have asked CODVO.AI to build the layer that turns a transcript into a signed
+  note, and they have asked for an architect who can defend the design to their CMIO and
+  their compliance officer, not only to their engineers.</p>
+
+  <p><strong>You are that architect.</strong></p>
+</section>
+
+<section id="objective">
+  <h2>2 · Your objective</h2>
+
+  <p>Build a reproducible system that takes one operating-room transcript and produces
+  four things:</p>
+
+  <div class="register">
+    <div class="reg-row">
+      <div class="reg-num">A</div>
+      <div>
+        <div class="reg-name">A structured operative record</div>
+        <div class="reg-note">Every clinical field the institution requires, each one
+        carrying the transcript utterances that support it and a confidence.</div>
+      </div>
+      <div><span class="chip ok">Scored</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">B</div>
+      <div>
+        <div class="reg-name">A draft narrative operative note</div>
+        <div class="reg-note">In the institution's template and register, ready for a
+        surgeon to read, edit and sign.</div>
+      </div>
+      <div><span class="chip ok">Scored</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">C</div>
+      <div>
+        <div class="reg-name">A coding proposal</div>
+        <div class="reg-note">CPT and ICD-10 selected from the supplied code universe,
+        each with a written rationale and its evidence.</div>
+      </div>
+      <div><span class="chip ok">Scored</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">D</div>
+      <div>
+        <div class="reg-name">A review queue for the surgeon</div>
+        <div class="reg-note">What the system is unsure about, what conflicts, and what
+        the transcript never said. Ranked, so a busy surgeon reads the top three.</div>
+      </div>
+      <div><span class="chip ok">Scored</span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="label">What we are really assessing</div>
+    <p>This is an architect role. We care far more about how you decompose the problem,
+    how you keep a generative system honest, how you measure it, and what you traded away,
+    than about the polish of any single note. A modest system whose failure modes you can
+    name and demonstrate beats an impressive one you cannot account for.</p>
+  </div>
+</section>
+
+<section id="data">
+  <h2>3 · The data package</h2>
+  <p class="lede">Everything is under <code>data/</code>. Read
+  <code>docs/data_dictionary.md</code> and <code>docs/documentation_standard.md</code>
+  before you write a prompt.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th style="width:34%">Path</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>data/transcripts/*.jsonl</code></td>
+        <td><strong>20 cases.</strong> One utterance per line, in time order. Roughly
+        300 to 700 utterances per case, which is 6k to 10k tokens of transcript.</td>
+      </tr>
+      <tr>
+        <td><code>data/gold/*.json</code></td>
+        <td>Structured operative records for <strong>12 of the 20 cases</strong>, produced
+        by a clinical reviewer. This is your labeled set. The remaining 8 cases have no
+        gold record.</td>
+      </tr>
+      <tr>
+        <td><code>data/gold/*.md</code></td>
+        <td>The <strong>signed operative note</strong> for those same 12 cases. This is
+        your style corpus and your narrative reference.</td>
+      </tr>
+      <tr>
+        <td><code>data/reference/cpt_codes.csv</code></td>
+        <td>The allowed CPT universe with official descriptors. Codes outside this file
+        are not valid submissions.</td>
+      </tr>
+      <tr>
+        <td><code>data/reference/icd10_codes.csv</code></td>
+        <td>The allowed ICD-10-CM universe with descriptors.</td>
+      </tr>
+      <tr>
+        <td><code>docs/documentation_standard.md</code></td>
+        <td>The institution's rules: which note sections are mandatory, which fields must
+        be numeric, what has to be stated explicitly rather than implied.</td>
+      </tr>
+      <tr>
+        <td><code>schemas/op_record.schema.json</code></td>
+        <td>The output contract as JSON Schema. Your submission is validated against
+        this file before it is scored.</td>
+      </tr>
+      <tr>
+        <td><code>data/sample_case/</code></td>
+        <td>One case end to end: transcript, gold record, signed note, and the expected
+        output files. Build against this first.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Transcript format</h3>
+  <p>One JSON object per line. Fields are documented in full in the data dictionary.</p>
+
+<pre>{"case_id": "CASE_0007", "utt_id": "u0142", "t_start_s": 1284.6, "t_end_s": 1291.2,
+ "speaker": "SPK_2", "speaker_role_hint": "surgeon", "asr_confidence": 0.83,
+ "text": "okay I'm happy with that, critical view achieved, two structures only"}</pre>
+
+  <p><code>speaker_role_hint</code> is what the diarization service guessed. It is a hint.
+  It is not always right, and there are more people in the room than there are roles in
+  the schema.</p>
+
+  <div class="callout warn">
+    <div class="label">The case mix is not uniform, and we are not telling you what is in it</div>
+    <p>Most of these are routine cases. A minority are not. A pipeline tuned only to the
+    straightforward case will be found out on the live set, and the interesting part of
+    the presentation will be why.</p>
+  </div>
+</section>
+
+<section id="hard">
+  <h2>4 · Why this is hard</h2>
+  <p class="lede">These are transcripts of a working operating room, not dictations. The
+  difficulty is not the length. It is that speech is a bad source of truth and you are
+  being asked to produce a legal medical document from it.</p>
+
+  <p>Some of what you will meet, stated generally, because working out the specifics is
+  the job:</p>
+
+  <ul class="plain">
+    <li><strong>People correct themselves.</strong> A number said once is not a number.
+    Later statements can supersede earlier ones, and sometimes the earlier one was right.</li>
+    <li><strong>People discuss things they then do not do.</strong> Considering a
+    cholangiogram, deciding against it, and moving on is a very common exchange. It reads
+    almost identically to performing one.</li>
+    <li><strong>Negation and hedging carry clinical weight.</strong> "That might be the
+    cystic artery" during dissection is not a finding. "No evidence of bile duct injury"
+    is a finding, and it is the opposite of the one a careless extractor will record.</li>
+    <li><strong>Not everyone in the room is dictating.</strong> Anesthesia, the
+    circulator and the scrub tech all speak. So does the radio. Attribution matters.</li>
+    <li><strong>The speech-to-text is imperfect.</strong> Anatomical terms, instrument
+    brand names and drug names are where it breaks, and it breaks confidently.</li>
+    <li><strong>The template asks for things nobody said.</strong> Some required fields
+    have no support anywhere in the transcript. What your system does at that moment is
+    the single most important behavior in this assignment.</li>
+  </ul>
+
+  <div class="callout stop">
+    <div class="label">The rule that shapes everything else</div>
+    <p>A confident wrong value is worse than an honest null. We score abstention as
+    <em>correct</em> when the transcript genuinely does not contain the fact. Read that
+    again before you design your prompts: the system is rewarded for saying "not
+    documented" and punished for filling the gap plausibly.</p>
+  </div>
+</section>
+
+<section id="contract">
+  <h2>5 · The output contract</h2>
+  <p class="lede">This part is fixed. Everything upstream of it is your decision.</p>
+
+  <p>For each case your system writes one file, <code>out/&lt;case_id&gt;.json</code>,
+  validating against <code>schemas/op_record.schema.json</code>. Abbreviated shape:</p>
+
+<pre>{
+  "case_id": "CASE_T03",
+  "fields": {
+    "procedure_performed":    {"value": "Laparoscopic cholecystectomy",
+                               "evidence": ["u0031","u0044"], "confidence": 0.94},
+    "converted_to_open":      {"value": false, "evidence": ["u0402"], "confidence": 0.88},
+    "cholangiogram_performed":{"value": false, "evidence": ["u0217"], "confidence": 0.71},
+    "critical_view_of_safety":{"value": "achieved_and_stated",
+                               "evidence": ["u0142"], "confidence": 0.90},
+    "estimated_blood_loss_ml":{"value": 25,   "evidence": ["u0511"], "confidence": 0.95},
+    "drain_placed":           {"value": null, "evidence": [],        "confidence": 0.55},
+    "specimen_disposition":   {"value": "sent to pathology",
+                               "evidence": ["u0530"], "confidence": 0.86},
+    "complications":          {"value": [],   "evidence": ["u0544"], "confidence": 0.80},
+    "counts_correct":         {"value": true, "evidence": ["u0561"], "confidence": 0.92}
+  },
+  "coding": {
+    "cpt":   [{"code":"47562","rationale":"...","evidence":["u0031","u0402"],"confidence":0.9}],
+    "icd10": [{"code":"K80.20","rationale":"...","evidence":["u0012"],"confidence":0.85}]
+  },
+  "review_queue": [
+    {"rank":1, "field":"estimated_blood_loss_ml", "reason":"two conflicting statements",
+     "evidence":["u0498","u0511"]}
+  ],
+  "note_markdown": "PREOPERATIVE DIAGNOSIS: ...",
+  "run": {"models":["..."], "prompt_version":"...", "input_tokens":0, "output_tokens":0,
+          "usd":0.0, "wall_clock_s":0.0, "llm_calls":0}
+}</pre>
+
+  <p>Three rules about this object:</p>
+
+  <ul class="plain">
+    <li><strong>Every field carries its evidence.</strong> <code>evidence</code> is a list
+    of <code>utt_id</code> values from that case's transcript. We check that the cited
+    utterances actually support the value. Citing the whole transcript is not evidence.</li>
+    <li><strong><code>null</code> is a legitimate value</strong> and means "the transcript
+    does not say." It is not a failure state and it is not an error to be logged.</li>
+    <li><strong><code>run</code> is not optional.</strong> If you cannot tell us what a
+    note cost and how long it took, you have not built a production system.</li>
+  </ul>
+
+  <h3>Command-line contract</h3>
+  <p>One command, no interactive prompts, reading a directory of transcripts and writing a
+  directory of records:</p>
+
+<pre>python -m scribe.run --in data/transcripts/ --out out/ [--mock]</pre>
+
+  <p>You may extend the schema with extra fields. You may not remove or rename what is
+  there.</p>
+</section>
+
+<section id="architecture">
+  <h2>6 · Choose your architecture</h2>
+  <p class="lede">We are handing you a contract and a corpus, not a design. How you get
+  from transcript to record is yours to choose and yours to defend.</p>
+
+  <div class="opts">
+    <div class="opt">
+      <div class="tag">Option A</div>
+      <h3>Single-pass extraction</h3>
+      <p>One capable model, one schema-constrained call, the whole transcript in context.
+      Cheapest to build, easiest to reason about, most deterministic. If this is enough,
+      say so and show it.</p>
+    </div>
+    <div class="opt">
+      <div class="tag">Option B</div>
+      <h3>Fixed pipeline</h3>
+      <p>A deterministic chain of specialized calls: segment, extract, code, compose,
+      verify. No autonomy, full control over the path, each stage testable on its own.</p>
+    </div>
+    <div class="opt">
+      <div class="tag">Option C</div>
+      <h3>Supervised multi-agent</h3>
+      <p>A supervisor routing to specialist agents with tools, dynamic control flow, and a
+      critic that can send work back. Most capable, hardest to keep deterministic, most
+      expensive per note.</p>
+    </div>
+    <div class="opt">
+      <div class="tag">Option D</div>
+      <h3>Your own</h3>
+      <p>Something else, if you can justify it against the same yardsticks: accuracy,
+      cost, latency, determinism and how a failure gets diagnosed at 2am.</p>
+    </div>
+  </div>
+
+  <div class="callout stop">
+    <div class="label">Expect this question</div>
+    <p><strong>Why did you not choose the simplest thing that works?</strong> The
+    transcripts fit in a single context window. That is deliberate. It means nothing is
+    forcing you to decompose, so if you decompose it has to be because decomposition buys
+    you something you can name and preferably measure. "It is agentic" is not a reason.
+    An architect who ships Option A with evidence that B and C did not earn their cost is
+    a stronger candidate than one who ships C because C is the fashionable answer.</p>
+  </div>
+</section>
+
+<section id="mandatory">
+  <h2>7 · Mandatory capabilities</h2>
+  <p class="lede">Whatever architecture you pick, these six have to be present and you
+  have to be able to point at where they live in your code.</p>
+
+  <div class="register">
+    <div class="reg-row">
+      <div class="reg-num">1</div>
+      <div>
+        <div class="reg-name">Codes come from a tool, not from memory</div>
+        <div class="reg-note">CPT and ICD-10 selection must go through a lookup against
+        <code>data/reference/</code>. A model reciting a code from its weights is a
+        clawback waiting to happen, and it is the one behavior a compliance officer will
+        test you on.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">2</div>
+      <div>
+        <div class="reg-name">Evidence binding</div>
+        <div class="reg-note">Every emitted value traces to specific utterances, or it is
+        null. The narrative note must be derivable from the structured record, not written
+        freehand alongside it.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">3</div>
+      <div>
+        <div class="reg-name">An independent verification step</div>
+        <div class="reg-note">Something that re-reads the draft against the transcript and
+        can reject or revise it. The generator marking its own homework does not count;
+        show us why your check is independent of the thing it checks.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">4</div>
+      <div>
+        <div class="reg-name">Guardrails inside the pipeline</div>
+        <div class="reg-note">Identifiers spoken aloud in the room must be handled before
+        anything leaves your process boundary. Out-of-scope requests and prompt-injection
+        attempts from transcript text must not steer the run. This is control-flow
+        enforcement, not an HTTP middleware.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">5</div>
+      <div>
+        <div class="reg-name">Calibrated confidence and escalation</div>
+        <div class="reg-note">Confidence has to mean something: low-confidence fields
+        should be wrong more often than high-confidence ones, and you should be able to
+        show that on your labeled set. The review queue is how a surgeon consumes it.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+    <div class="reg-row">
+      <div class="reg-num">6</div>
+      <div>
+        <div class="reg-name">A degraded mode that still runs</div>
+        <div class="reg-note"><code>--mock</code> runs the whole pipeline offline against
+        recorded fixtures, with no network. It exists so a rate limit cannot kill your
+        demo, and so we can see the orchestration independently of the model.</div>
+      </div>
+      <div><span class="chip stop">Required</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="eval">
+  <h2>8 · Build your own evaluation</h2>
+  <p class="lede">We are not giving you a metric. Deciding what "good" means for a
+  generative system that writes medical documents is a substantial part of this
+  assignment.</p>
+
+  <p>You have 12 gold records. Build a harness that runs your system over them and reports
+  numbers. At minimum we expect you to have an opinion about:</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th style="width:30%">Dimension</th><th>The question it answers</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Field accuracy</strong></td>
+        <td>How often is a populated field right? Handle the field types differently:
+        a numeric blood loss is not scored like a free-text disposition.</td></tr>
+      <tr><td><strong>Hallucination rate</strong></td>
+        <td>How often does the system assert something the transcript does not support?
+        This is the number the CMIO will ask for first.</td></tr>
+      <tr><td><strong>Abstention quality</strong></td>
+        <td>When it says null, is it right to? Both failure directions matter: inventing
+        a value, and refusing to state one that was said clearly.</td></tr>
+      <tr><td><strong>Evidence precision</strong></td>
+        <td>Do the cited utterances actually support the value, or is the citation
+        decorative?</td></tr>
+      <tr><td><strong>Coding accuracy</strong></td>
+        <td>Exact code match, and separately, whether the rationale holds up.</td></tr>
+      <tr><td><strong>Calibration</strong></td>
+        <td>Does confidence track correctness? A system that is 0.95 confident about
+        everything has no confidence signal at all.</td></tr>
+      <tr><td><strong>Note quality</strong></td>
+        <td>Would a surgeon sign it without rewriting it? Say how you measured this
+        rather than asserting it.</td></tr>
+      <tr><td><strong>Cost and latency</strong></td>
+        <td>Dollars and seconds per note, at p50 and p95. This service runs a few hundred
+        cases a month.</td></tr>
+      <tr><td><strong>Determinism</strong></td>
+        <td>Run the same case twice. How much does the output move, and does that matter
+        for a document that gets signed?</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <div class="label">Report the numbers you got, not the numbers you wanted</div>
+    <p>A submission that says "hallucination rate 6.2%, concentrated in specimen
+    disposition and drain placement, and here is why" is stronger than one claiming 0%.
+    We will look for the failure cases ourselves, and it goes better when you found them
+    first.</p>
+  </div>
+</section>
+
+<section id="stretch">
+  <h2>9 · Stretch, if the core is solid</h2>
+  <p class="lede">Only after the core works end to end, and <strong>only one of
+  these</strong>. We would rather see one done properly than four sketched.</p>
+
+  <ul class="plain">
+    <li><strong>Cross-case questioning.</strong> A conversational layer over the corpus of
+    generated records: "how many cases this month had no Critical View of Safety
+    documented, and which surgeons?" Show how you keep it from answering questions the
+    data cannot support.</li>
+    <li><strong>Streaming mode.</strong> Produce the note progressively as the case runs,
+    aware of surgical phase, so the draft is ready when the patient leaves the room.
+    Explain what breaks when you can no longer see the whole transcript at once.</li>
+    <li><strong>Surgeon style adaptation.</strong> Match the individual surgeon's register
+    and structure using the signed notes as a corpus, without letting style leak into
+    clinical content.</li>
+    <li><strong>Cost engineering.</strong> Get the per-note cost down by a large factor
+    with model routing or a small model plus escalation, and show on your eval what it
+    cost you in accuracy.</li>
+    <li><strong>Eval as a gate.</strong> Wire the harness into CI so a prompt change that
+    regresses hallucination rate fails the build. Show it failing.</li>
+  </ul>
+</section>
+
+<section id="live">
+  <h2>10 · The live test</h2>
+  <p class="lede">In the final 20 minutes we hand you transcripts you have never seen and
+  run your pipeline on the call.</p>
+
+  <p>Four cases, identical schema to <code>data/transcripts/</code>, drawn from the same
+  service. You run one command. We take the <code>out/</code> directory and score it
+  against records our clinical reviewer prepared.</p>
+
+  <div class="readout">
+<span class="k">we check, in this order</span>
+1. <span class="have">schema valid</span>      does every file validate against op_record.schema.json
+2. <span class="have">evidence resolves</span>  does every utt_id exist in that case's transcript
+3. <span class="have">field accuracy</span>     value match against the reviewer's record
+4. <span class="have">abstention</span>         null where the transcript is genuinely silent
+5. <span class="miss">hallucination</span>      values asserted with no supporting utterance
+6. <span class="have">coding</span>             CPT and ICD-10 against the reviewer's codes
+7. <span class="have">review queue</span>       did the top-ranked item point at a real problem
+8. <span class="have">run manifest</span>       cost and latency actually reported
+  </div>
+
+  <p>At least one of the four is not a routine case. Your review queue matters more on
+  that one than your accuracy does.</p>
+
+  <div class="callout warn">
+    <div class="label">If it does not run, we cannot score it</div>
+    <p>Rehearse the exact command end to end the day before, on a clean clone, with a
+    fresh virtual environment. Have <code>--mock</code> tested and ready: if your provider
+    rate-limits you live, you switch to mock and keep talking, and we will score the
+    orchestration. Watching someone debug an import error for twelve minutes tells us
+    something, and it is not what you want it to tell us.</p>
+  </div>
+</section>
+
+<section id="present">
+  <h2>11 · The presentation</h2>
+  <p>Sixty minutes with the team. Slides are optional. A walk through the repository and
+  your reasoning works just as well, and often better.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th style="width:90px">Time</th><th>Segment</th></tr></thead>
+    <tbody>
+      <tr><td><strong>40 min</strong></td>
+        <td>Your read of the problem, the architecture and why you rejected the
+        alternatives, how you keep the generative parts honest, your eval and what it
+        told you, and where the system fails. Expect us to interrupt.</td></tr>
+      <tr><td><strong>20 min</strong></td>
+        <td>Live run on four unseen cases, then questions.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Bring one slide, or one paragraph, that answers this: <em>if this service went live
+  on Monday and a note it generated ended up in a malpractice deposition, what in your
+  design protects the hospital?</em></p>
+</section>
+
+<section id="evaluate">
+  <h2>12 · How we score you</h2>
+  <p class="lede">Judgment and engineering discipline are weighted above accuracy. The
+  live numbers are one input among several.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th style="width:28%">Dimension</th><th>What a strong submission shows</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Problem framing</strong></td>
+        <td>You understood that the deliverable is a signed legal document, and designed
+        backward from that rather than forward from the transcript.</td></tr>
+      <tr><td><strong>Architectural restraint</strong></td>
+        <td>Every component earns its place. You can say what each LLM call is for, what
+        it costs, and what happens if you delete it.</td></tr>
+      <tr><td><strong>Grounding and honesty</strong></td>
+        <td>Evidence binding is real, not decorative. Abstention works. You can
+        demonstrate the system refusing to invent something.</td></tr>
+      <tr><td><strong>Guardrails</strong></td>
+        <td>Identifier handling and injection resistance are enforced in the control flow
+        and you can show them firing, not just described in the README.</td></tr>
+      <tr><td><strong>Evaluation rigor</strong></td>
+        <td>Metrics you chose and justified, an honest read of where the system breaks,
+        and no leakage between the cases you tuned on and the cases you report on.</td></tr>
+      <tr><td><strong>Production thinking</strong></td>
+        <td>Cost per note, latency, determinism, prompt versioning, what you log, how you
+        would debug a bad note two weeks after it was signed.</td></tr>
+      <tr><td><strong>Clinical seriousness</strong></td>
+        <td>You engaged with the documentation standard and the coding rules rather than
+        treating them as string-matching targets.</td></tr>
+      <tr><td><strong>Reproducibility</strong></td>
+        <td>Fresh clone runs. Dependencies pinned, secrets in environment variables,
+        <code>--mock</code> works with the network off.</td></tr>
+      <tr><td><strong>Communication</strong></td>
+        <td>You defend every decision and name the limitations before we do.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="rules">
+  <h2>13 · Ground rules</h2>
+
+  <ul class="plain">
+    <li><strong>AI coding assistants are allowed</strong> and expected. You must
+    understand and defend every line. We probe deeply, and the gap between authored and
+    generated code is visible from the outside.</li>
+    <li><strong>Bring your own model and key.</strong> Any provider. Keys go in
+    environment variables and never in the repository. We will check.</li>
+    <li><strong>Any framework, or none.</strong> LangGraph, LangChain, CrewAI, DSPy, the
+    provider SDK on its own, all fine. If you use a framework, expect to be asked what it
+    bought you that plain code would not have.</li>
+    <li><strong>Budget your spend and report it.</strong> Keep the whole build under
+    roughly 25 US dollars of tokens and tell us what it actually came to. An architect who
+    does not know the unit economics of their own system is a risk.</li>
+    <li><strong>Treat the data as if it were real PHI.</strong> It is synthetic. Handle it
+    as though it were not: no pasting transcripts into consumer chat interfaces, no
+    third-party services you would not put a patient record through. How you behave here
+    is itself a signal.</li>
+    <li><strong>Do not over-build.</strong> Three days. A focused system with an honest
+    eval beats a platform.</li>
+    <li><strong>Document assumptions rather than emailing questions.</strong> Stating a
+    reasonable assumption clearly is a signal we value. If something genuinely blocks you,
+    do reach out.</li>
+    <li><strong>Commit incrementally.</strong> We read the history. It tells us how you
+    work.</li>
+  </ul>
+</section>
+
+<section id="submit">
+  <h2>14 · Timeline and submission</h2>
+
+  <ul class="plain">
+    <li><strong>Day 0.</strong> You receive this repository.</li>
+    <li><strong>~3 days.</strong> Design and build.</li>
+    <li><strong>Presentation day.</strong> Push your final commit before the call. Your
+    write-up goes in the <code>README</code>: architecture, the options you rejected and
+    why, your eval results, known failure modes, and what you would do with a month.
+    Anything else goes under <code>submission/</code>.</li>
+  </ul>
+
+  <p>Confirm the presentation time with your CODVO.AI contact. Questions before then are
+  welcome: reply to the assignment email.</p>
+</section>
+
+<section id="faq">
+  <h2>15 · FAQ</h2>
+
+  <h3>Do I get the audio?</h3>
+  <p>No. Speech-to-text is a solved commodity and it is not what we are hiring for. You
+  get transcripts with the recognition errors a real service produces.</p>
+
+  <h3>Which model should I use?</h3>
+  <p>Your call, and a defensible one either way. We will ask why that model, whether you
+  tried a cheaper one, and what the accuracy difference actually was on your eval.</p>
+
+  <h3>Can I fine-tune?</h3>
+  <p>Yes, if the result runs inside the live window and you can explain what 12 labeled
+  cases can and cannot teach a model. Prompting and retrieval are entirely acceptable
+  answers here.</p>
+
+  <h3>Twelve gold records is not much. Is that a mistake?</h3>
+  <p>No. It is the realistic condition. Designing an evaluation on a small labeled set,
+  and being honest about the confidence intervals that implies, is part of the
+  assignment.</p>
+
+  <h3>What if my system produces more than the schema asks for?</h3>
+  <p>Include it. Extra fields are welcome as long as the required ones are present and
+  valid, since that is what the live scoring reads.</p>
+
+  <h3>How accurate does it have to be?</h3>
+  <p>There is no threshold. We assess the whole approach. "Here is where it works, here is
+  where it does not, and here is why" is worth more than a number with nothing behind
+  it.</p>
+
+  <h3>Can I ignore the stretch section?</h3>
+  <p>Yes. A solid core with no stretch scores better than a weak core with one bolted
+  on.</p>
+</section>
+
+<hr class="div">
+
+<p style="margin-top:26px;color:var(--muted);font-size:14px;font-family:var(--display)">
+CODVO.AI · Agentic AI Architect · Take-home assignment · Questions? Reply to your
+assignment email.</p>
+
+</main>
+</div>

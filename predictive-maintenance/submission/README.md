@@ -1,14 +1,14 @@
 # submission/
 
-Put your deliverables here (or organise the repo however you prefer — just
-make it easy to find and run).
+Put your deliverables here, or organize the repo however you prefer, as long as
+it is easy to find and easy to run.
 
 Suggested contents:
 
 - `pipeline/` or scripts — data prep, feature engineering, training, evaluation
 - `model/` — your trained model artifact(s)
 - `predict.py` — the inference entry point (see the live-inference contract in
-  the root `README.md` and §7 of `TASK.html`)
+  this task's `README.md`, one level up, and §7 of `TASK.html`)
 - `predictions.csv` — example output produced from `data/sample_test_input.csv`
 - notebooks, EDA, figures — optional but welcome
 
